@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleTanksClient", "BattleTanksClient\BattleTanksClient.csproj", "{D6B5C7B6-FDA8-4519-8F06-D83A897F4874}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleTanksCommon", "BattleTanksCommon\BattleTanksCommon.csproj", "{77144169-E357-499A-A416-D2EB88618329}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleTanksServer", "BattleTanksServer\BattleTanksServer.csproj", "{0590D4CD-722F-4847-A0F2-8B7407D6A213}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D6B5C7B6-FDA8-4519-8F06-D83A897F4874}.Debug|x64.ActiveCfg = Debug|x64
+		{D6B5C7B6-FDA8-4519-8F06-D83A897F4874}.Debug|x64.Build.0 = Debug|x64
+		{D6B5C7B6-FDA8-4519-8F06-D83A897F4874}.Release|x64.ActiveCfg = Release|x64
+		{D6B5C7B6-FDA8-4519-8F06-D83A897F4874}.Release|x64.Build.0 = Release|x64
+		{77144169-E357-499A-A416-D2EB88618329}.Debug|x64.ActiveCfg = Debug|x64
+		{77144169-E357-499A-A416-D2EB88618329}.Debug|x64.Build.0 = Debug|x64
+		{77144169-E357-499A-A416-D2EB88618329}.Release|x64.ActiveCfg = Release|x64
+		{77144169-E357-499A-A416-D2EB88618329}.Release|x64.Build.0 = Release|x64
+		{0590D4CD-722F-4847-A0F2-8B7407D6A213}.Debug|x64.ActiveCfg = Debug|x64
+		{0590D4CD-722F-4847-A0F2-8B7407D6A213}.Debug|x64.Build.0 = Debug|x64
+		{0590D4CD-722F-4847-A0F2-8B7407D6A213}.Release|x64.ActiveCfg = Release|x64
+		{0590D4CD-722F-4847-A0F2-8B7407D6A213}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {430AC789-5869-40FE-8795-94BF722A4151}
+	EndGlobalSection
+EndGlobal
