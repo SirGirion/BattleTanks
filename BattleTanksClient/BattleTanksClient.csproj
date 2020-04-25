@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <MonoGameContentReference Include="Content\Content.mgcb" Visible="false" />
+    <MonoGameContentReference Include="Content\Content.mgcb" Visible="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,8 +33,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MonoGame.Extended" Version="3.7.0" />
     <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.*" />
     <PackageReference Include="MonoGame.Content.Builder" Version="3.7.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BattleTanksCommon\BattleTanksCommon.csproj" />
   </ItemGroup>
 
 </Project>
