@@ -58,7 +58,7 @@ namespace BattleTanksClient
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
             //_spriteBatch.Draw(_testTexture, new Vector2(0, 0), Color.White);
-            _spriteBatch.Draw(_atlas.GetRegion("explosion1"), new Vector2(100, 100), Color.White);
+            _spriteBatch.Draw(_atlas.GetRegion("explosion2"), new Vector2(100, 100), Color.White);
             _spriteBatch.End();
 
             base.Draw(gameTime);
