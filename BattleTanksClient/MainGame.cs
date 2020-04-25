@@ -1,9 +1,14 @@
-﻿using BattleTanksCommon.KenneyAssets;
+﻿using BattleTanksClient.CommonExtensions;
+using BattleTanksClient.Controllers;
+using BattleTanksCommon.Entities;
+using BattleTanksCommon.KenneyAssets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input.InputListeners;
 using MonoGame.Extended.TextureAtlases;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace BattleTanksClient
@@ -14,6 +19,8 @@ namespace BattleTanksClient
         private SpriteBatch _spriteBatch;
         private Texture2D _testTexture;
         private TextureAtlas _atlas;
+        private Player _player;
+        private MovementController _movementController;
 
         public MainGame()
         {
@@ -25,7 +32,10 @@ namespace BattleTanksClient
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            var mouseListener = new MouseListener(new MouseListenerSettings());
+            var keyboardListener = new KeyboardListener(new KeyboardListenerSettings());
+            Components.Add(new InputListenerComponent(this, mouseListener, keyboardListener));
+            _movementController = new MovementController(mouseListener, keyboardListener);
             base.Initialize();
         }
 
@@ -38,6 +48,9 @@ namespace BattleTanksClient
             if (File.Exists(@"Content\allSprites_default.xml"))
             {
                 _atlas = TextureAtlasData.CreateFromFile(Content, @"Content\allSprites_default.xml");
+                _player = new Player("tank_red");
+                _player.SetMainSprite(_atlas);
+                _movementController.RegisterPlayer(_player);
             }
         }
 
@@ -58,7 +71,7 @@ namespace BattleTanksClient
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
             //_spriteBatch.Draw(_testTexture, new Vector2(0, 0), Color.White);
-            _spriteBatch.Draw(_atlas.GetRegion("explosion3"), new Vector2(100, 100), Color.White);
+            _player.Draw(_spriteBatch);
             _spriteBatch.End();
 
             base.Draw(gameTime);

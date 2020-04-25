@@ -10,7 +10,6 @@ using System.Xml.Serialization;
 
 namespace BattleTanksCommon.KenneyAssets
 {
-
     [XmlRoot("TextureAtlas")]
     public class TextureAtlasData
     {
