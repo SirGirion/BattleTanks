@@ -31,7 +31,7 @@ namespace BattleTanksCommon.KenneyAssets
 
                 var sheetPath = textureAtlasData.ImagePath.Replace(".png", "");
                 var sheet = content.Load<Texture2D>(sheetPath);
-                var atlas = new TextureAtlas("", sheet);
+                var atlas = new TextureAtlas(sheetPath, sheet);
 
                 foreach (var subTexture in textureAtlasData.SubTextures)
                     atlas.CreateRegion(subTexture.Name.Replace(".png", ""), subTexture.X, subTexture.Y, subTexture.Width, subTexture.Height);
