@@ -1,53 +1,104 @@
 ﻿using BattleTanksCommon.Entities.Interfaces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Sprites;
+using MonoGame.Extended.TextureAtlases;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace BattleTanksCommon.Entities
 {
-    public class Player : IMoveableEntity, IRotatableEntity, IMultiTextureEntity
+    public class Player : Entity
     {
-        public Vector2 Position { get; set; } = new Vector2(100, 100);
-        public float MovementSpeed { get; set; } = 2f;
-        public Vector2 Rotation { get; set; } = new Vector2(0, 1);
-        public float RotationSpeed { get; set; } = 0.1f;
+        private readonly Transform2 _transform;
+        private readonly Transform2 _barrelTransform;
 
-        public Sprite MainSprite { get; set; }
-        public string MainSpriteName { get; }
+        private Sprite _bodySprite;
+        private Sprite _barrelSprite;
 
-        public Player(string spriteName)
+        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
+
+        public Vector2 Position
         {
-            MainSpriteName = spriteName;
+            get => _transform.Position;
+            set
+            {
+                _transform.Position = value;
+                
+            }
         }
 
-        public void Rotate(float degrees)
+        public Vector2 BarrelPosition
         {
-
+            get => _barrelTransform.Position;
+            set => _barrelTransform.Position = value;
         }
 
-        public void RotateLeft()
+        public float Rotation
         {
-            var degrees = -1 * RotationSpeed;
-            Rotation = Rotation.Rotate(degrees);
+            get => _transform.Rotation - MathHelper.ToRadians(90);
+            set => _transform.Rotation = value + MathHelper.ToRadians(90);
         }
 
-        public void RotateRight()
+        public float BarrelRotation
         {
-            var degrees = 1 * RotationSpeed;
-            Rotation = Rotation.Rotate(degrees);
+            get => _barrelTransform.Rotation + MathHelper.ToRadians(90);
+            set => _barrelTransform.Rotation = value - MathHelper.ToRadians(90);
         }
 
-        /// <summary>
-        /// Moves the player based on their movement speed and current rotation vector.
-        /// </summary>
-        /// <param name="direction">1 for forward, -1 for backward.</param>
-        public void Move(int direction)
+        public Vector2 Velocity { get; set; }
+
+        public Player(TextureRegion2D bodyTexture, TextureRegion2D barrelTexture)
         {
-            var movementDelta = Rotation * direction * MovementSpeed;
-            Position = Position.Translate(movementDelta.X, movementDelta.Y);
+            _bodySprite = new Sprite(bodyTexture);
+            _barrelSprite = new Sprite(barrelTexture)
+            {
+                OriginNormalized = new Vector2(0.5f, 0.0f)
+            };
+            _transform = new Transform2
+            {
+                Scale = Vector2.One,
+                Position = new Vector2(400, 240)
+            };
+            _barrelTransform = new Transform2
+            {
+                Scale = Vector2.One,
+                Position = new Vector2(400, 240)
+            };
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(_bodySprite, _transform);
+            spriteBatch.Draw(_barrelSprite, _barrelTransform);
+            spriteBatch.DrawPoint(_barrelSprite.OriginNormalized + BarrelPosition, Color.Green);
+            spriteBatch.DrawPoint(Position + _bodySprite.OriginNormalized, Color.Red);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Position += Velocity * deltaTime;
+            BarrelPosition += Velocity * deltaTime;
+            Velocity *= 0.98f;
+
+            //if (_fireCooldown > 0)
+            //{
+            //    _fireCooldown -= deltaTime;
+            //}
+        }
+
+        public void Accelerate(float acceleration)
+        {
+            Velocity += Direction * acceleration;
+        }
+
+        public void LookAt(Vector2 point)
+        {
+            BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));// - 90f;
         }
     }
 }
