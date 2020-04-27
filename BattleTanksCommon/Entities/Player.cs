@@ -18,7 +18,9 @@ namespace BattleTanksCommon.Entities
         private Sprite _bodySprite;
         private Sprite _barrelSprite;
 
-        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
+        public float MovementSpeed { get; set; } = 2.0f;
+
+        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation) * MovementSpeed;
 
         public Vector2 Position
         {
@@ -81,8 +83,8 @@ namespace BattleTanksCommon.Entities
         {
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Position += Velocity * deltaTime;
-            BarrelPosition += Velocity * deltaTime;
+            //Position += Velocity * deltaTime;
+            //BarrelPosition += Velocity * deltaTime;
             Velocity *= 0.98f;
 
             //if (_fireCooldown > 0)
@@ -93,12 +95,19 @@ namespace BattleTanksCommon.Entities
 
         public void Accelerate(float acceleration)
         {
-            Velocity += Direction * acceleration;
+            Velocity = Direction * acceleration;
         }
 
         public void LookAt(Vector2 point)
         {
-            BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));// - 90f;
+            BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));
+        }
+
+        public void Move(int direction)
+        {
+            var movementDelta = Direction * direction * MovementSpeed;
+            Position = Position.Translate(movementDelta.X, movementDelta.Y);
+            BarrelPosition = BarrelPosition.Translate(movementDelta.X, movementDelta.Y);
         }
     }
 }
