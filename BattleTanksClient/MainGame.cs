@@ -1,5 +1,5 @@
-﻿using BattleTanksClient.CommonExtensions;
-using BattleTanksClient.Controllers;
+﻿using BattleTanksClient.Controllers;
+using BattleTanksClient.Entities;
 using BattleTanksCommon.Entities;
 using BattleTanksCommon.KenneyAssets;
 using Microsoft.Xna.Framework;
@@ -29,6 +29,7 @@ namespace BattleTanksClient
         private ViewportAdapter _viewportAdapter;
         private IEntityManager _entityManager;
         private TiledMapRenderer _mapRenderer;
+        private ProjectileFactory _projectileFactory;
 
         public MainGame()
         {
@@ -47,7 +48,7 @@ namespace BattleTanksClient
 
         protected override void LoadContent()
         {
-            _viewportAdapter = new ScalingViewportAdapter(GraphicsDevice, 800, 450);
+            _viewportAdapter = new ScalingViewportAdapter(GraphicsDevice, 1600, 900);
 
             _camera = new OrthographicCamera(_viewportAdapter);
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -55,7 +56,10 @@ namespace BattleTanksClient
             if (File.Exists(@"Content\allSprites_default.xml"))
             {
                 _atlas = TextureAtlasData.CreateFromFile(Content, @"Content\allSprites_default.xml");
-                _player = _entityManager.AddEntity(new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1")));
+                _projectileFactory = new ProjectileFactory(_entityManager, _atlas);
+                _player = _entityManager.AddEntity(
+                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
+                );
             }
 
             _movementController = new MovementController(_player, _camera);

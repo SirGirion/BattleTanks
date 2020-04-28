@@ -5,10 +5,12 @@ using System.Text;
 
 namespace BattleTanksCommon.Entities.Interfaces
 {
-    public interface IMoveableEntity
+    /// <summary>
+    /// Entity that exists at a certain point/rotation.
+    /// </summary>
+    public interface IStationaryEntity
     {
         Vector2 Position { get; set; }
-        Vector2 Velocity { get; set; }
-        float MovementSpeed { get; set; }
+        float Rotation { get; set; }
     }
 }

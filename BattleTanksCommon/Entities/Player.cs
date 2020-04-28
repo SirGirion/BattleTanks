@@ -1,4 +1,5 @@
-﻿using BattleTanksCommon.Entities.Components;
+﻿using BattleTanksClient.Entities;
+using BattleTanksCommon.Entities.Components;
 using BattleTanksCommon.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,35 +13,18 @@ using System.Text;
 
 namespace BattleTanksCommon.Entities
 {
-    public class Player : Entity
+    public class Player : BasicMovingEntity
     {
-        private readonly Transform2 _transform;
+        //private readonly Transform2 _transform;
         private readonly Transform2 _barrelTransform;
 
         private Sprite _bodySprite;
         private Sprite _barrelSprite;
 
-        public float MovementSpeed { get; set; } = 32.0f;
-        public float RotationSpeed { get => 2.5f; }
-
-        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
-
-        public Vector2 Position
-        {
-            get => _transform.Position;
-            set => _transform.Position = value;
-        }
-
         public Vector2 BarrelPosition
         {
             get => _barrelTransform.Position;
             set => _barrelTransform.Position = value;
-        }
-
-        public float Rotation
-        {
-            get => _transform.Rotation - MathHelper.ToRadians(90);
-            set => _transform.Rotation = value + MathHelper.ToRadians(90);
         }
 
         public float BarrelRotation
@@ -49,12 +33,13 @@ namespace BattleTanksCommon.Entities
             set => _barrelTransform.Rotation = value - MathHelper.ToRadians(90);
         }
 
-        public Vector2 Velocity { get; set; }
-
         public WeaponComponent WeaponComponent { get; set; }
+        private ProjectileFactory _factory;
 
-        public Player(TextureRegion2D bodyTexture, TextureRegion2D barrelTexture)
+        public Player(TextureRegion2D bodyTexture, TextureRegion2D barrelTexture, ProjectileFactory projectileFactory)
         {
+            MovementSpeed = 32.0f;
+            RotationSpeed = 2.5f;
             _bodySprite = new Sprite(bodyTexture);
             _barrelSprite = new Sprite(barrelTexture)
             {
@@ -70,15 +55,16 @@ namespace BattleTanksCommon.Entities
                 Scale = Vector2.One,
                 Position = new Vector2(400, 240)
             };
-            WeaponComponent = new WeaponComponent("redBarrel", "bulletRed1", 1000);
+            WeaponComponent = new WeaponComponent("redBarrel", "bulletRed1", 750);
+            _factory = projectileFactory;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_bodySprite, _transform);
             spriteBatch.Draw(_barrelSprite, _barrelTransform);
-            spriteBatch.DrawPoint(_barrelSprite.OriginNormalized + BarrelPosition, Color.Green);
-            spriteBatch.DrawPoint(Position + _bodySprite.OriginNormalized, Color.Red);
+            //spriteBatch.DrawPoint(_barrelSprite.OriginNormalized + BarrelPosition, Color.Green);
+            //spriteBatch.DrawPoint(Position + _bodySprite.OriginNormalized, Color.Red);
         }
 
         public override void Update(GameTime gameTime)
@@ -93,33 +79,19 @@ namespace BattleTanksCommon.Entities
             WeaponComponent.Update(gameTime);
         }
 
-        public void Accelerate(float acceleration)
-        {
-            Velocity = Direction * acceleration * MovementSpeed;
-        }
-
         public void LookAt(Vector2 point)
         {
             BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));
         }
-
-        public void Move(int direction)
-        {
-            var movementDelta = Direction * direction * MovementSpeed;
-            Position = Position.Translate(movementDelta.X, movementDelta.Y);
-            BarrelPosition = BarrelPosition.Translate(movementDelta.X, movementDelta.Y);
-        }
-
-        public void Rotate(float deltaTime)
-        {
-            Rotation += deltaTime * RotationSpeed;
-        }
+        
 
         public void Fire()
         {
             if (WeaponComponent.Fire())
             {
-                Debug.WriteLine("Bang!");
+                // Spawn the bullet
+                var bulletPosition = BarrelPosition + (Vector2.UnitX * _barrelSprite.TextureRegion.Height).Rotate(BarrelRotation);
+                _factory.SpawnProjectile(WeaponComponent, bulletPosition, BarrelRotation, 20.0f);
             }
         }
     }
