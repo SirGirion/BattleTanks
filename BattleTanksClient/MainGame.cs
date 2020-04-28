@@ -23,7 +23,7 @@ namespace BattleTanksClient
         private SpriteBatch _spriteBatch;
         private TextureAtlas _atlas;
         private Player _player;
-        //private MovementController _movementController;
+        private MovementController _movementController;
         private OrthographicCamera _camera;
         private MouseState _previousMouseState;
         private ViewportAdapter _viewportAdapter;
@@ -57,8 +57,30 @@ namespace BattleTanksClient
                 _atlas = TextureAtlasData.CreateFromFile(Content, @"Content\allSprites_default.xml");
                 _player = _entityManager.AddEntity(new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1")));
             }
-            _mapRenderer = new TiledMapRenderer(GraphicsDevice, Content.Load<TiledMap>("map01"));
+
+            _movementController = new MovementController(_player, _camera);
+            var map = Content.Load<TiledMap>("map01");
+            _mapRenderer = new TiledMapRenderer(GraphicsDevice);
+            LoadMap(map);
         }
+
+        float _minCameraX;
+        float _maxCameraX;
+        float _minCameraY;
+        float _maxCameraY;
+
+        public void LoadMap(TiledMap currentMap)
+        {
+            _mapRenderer.LoadMap(currentMap);
+
+            // Compute our camera bounds
+            _minCameraX = _camera.BoundingRectangle.Width / 2;
+            _maxCameraX = currentMap.WidthInPixels - _minCameraX;
+            _minCameraY = _camera.BoundingRectangle.Height / 2;
+            _maxCameraY = currentMap.HeightInPixels - _minCameraY;
+        }
+
+        private Vector2 _cameraTarget = Vector2.Zero;
 
         protected override void Update(GameTime gameTime)
         {
@@ -68,35 +90,19 @@ namespace BattleTanksClient
                 Exit();
 
             // TODO: Add your update logic here
-            var deltaTime = gameTime.GetElapsedSeconds();
-            var keyboardState = Keyboard.GetState();
-            var mouseState = Mouse.GetState();
+            _movementController.Update(gameTime);
 
-            if (keyboardState.IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (_player != null && !_player.IsDestroyed)
+            if (_player != null)
             {
-                if (keyboardState.IsKeyDown(Keys.W) || keyboardState.IsKeyDown(Keys.Up))
-                    _player.Accelerate(-5f);
+                // We want to clamp camera coordinates so that when the player gets to < CamWidth / 2 or World.MaxX - CamWidth / 2
+                // the camera doesnt change in x. Do the same for y.
+                var x = _player.Position.X;
+                var y = _player.Position.Y;
 
-                if (keyboardState.IsKeyDown(Keys.S) || keyboardState.IsKeyDown(Keys.Down))
-                    _player.Accelerate(5f);
+                _cameraTarget.X = MathHelper.Clamp(x, _minCameraX, _maxCameraX);
+                _cameraTarget.Y = MathHelper.Clamp(y, _minCameraY, _maxCameraY);
 
-                if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
-                    _player.Rotate(-deltaTime);
-
-                if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
-                    _player.Rotate(deltaTime);
-
-                //if (keyboardState.IsKeyDown(Keys.Space) || mouseState.LeftButton == ButtonState.Pressed)
-                //    _player.Fire();
-
-                if (_previousMouseState.X != mouseState.X || _previousMouseState.Y != mouseState.Y)
-                    _player.LookAt(_camera.ScreenToWorld(new Vector2(mouseState.X, mouseState.Y)));
-
-                _camera.LookAt(_player.Position);
-                //_camera.Zoom = 1.0f - _player.Velocity.Length() / 500f;
+                _camera.LookAt(_cameraTarget);
             }
 
             _entityManager.Update(gameTime);
@@ -111,19 +117,16 @@ namespace BattleTanksClient
             var viewMatrix = _camera.GetViewMatrix();
             var projectionMatrix = Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0f, -1f);
 
+            // Map
             _mapRenderer.Draw(ref viewMatrix, ref projectionMatrix);
 
-            // UI
-            _spriteBatch.Begin(samplerState: SamplerState.PointWrap, transformMatrix: _viewportAdapter.GetScaleMatrix());
-            _spriteBatch.End();
-
-            // entities
+            // Entities
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend, transformMatrix: _camera.GetViewMatrix());
             _entityManager.Draw(_spriteBatch);
             _spriteBatch.End();
 
-            _spriteBatch.Begin(transformMatrix: _camera.GetViewMatrix());
-
+            // UI
+            _spriteBatch.Begin(samplerState: SamplerState.PointWrap, transformMatrix: _viewportAdapter.GetScaleMatrix());
             _spriteBatch.End();
 
             base.Draw(gameTime);

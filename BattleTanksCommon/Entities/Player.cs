@@ -84,7 +84,6 @@ namespace BattleTanksCommon.Entities
         public override void Update(GameTime gameTime)
         {
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Debug.WriteLine(Velocity);
 
             Position += Velocity * deltaTime;
             BarrelPosition += Velocity * deltaTime;
