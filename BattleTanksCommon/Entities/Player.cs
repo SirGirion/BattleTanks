@@ -1,4 +1,5 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Entities.Components;
+using BattleTanksCommon.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -6,6 +7,7 @@ using MonoGame.Extended.Sprites;
 using MonoGame.Extended.TextureAtlases;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace BattleTanksCommon.Entities
@@ -18,16 +20,15 @@ namespace BattleTanksCommon.Entities
         private Sprite _bodySprite;
         private Sprite _barrelSprite;
 
+        public float MovementSpeed { get; set; } = 32.0f;
+        public float RotationSpeed { get => 2.5f; }
+
         public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
 
         public Vector2 Position
         {
             get => _transform.Position;
-            set
-            {
-                _transform.Position = value;
-                
-            }
+            set => _transform.Position = value;
         }
 
         public Vector2 BarrelPosition
@@ -50,6 +51,8 @@ namespace BattleTanksCommon.Entities
 
         public Vector2 Velocity { get; set; }
 
+        public WeaponComponent WeaponComponent { get; set; }
+
         public Player(TextureRegion2D bodyTexture, TextureRegion2D barrelTexture)
         {
             _bodySprite = new Sprite(bodyTexture);
@@ -67,6 +70,7 @@ namespace BattleTanksCommon.Entities
                 Scale = Vector2.One,
                 Position = new Vector2(400, 240)
             };
+            WeaponComponent = new WeaponComponent("redBarrel", "bulletRed1", 1000);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -83,22 +87,40 @@ namespace BattleTanksCommon.Entities
 
             Position += Velocity * deltaTime;
             BarrelPosition += Velocity * deltaTime;
-            Velocity *= 0.98f;
+            Velocity = Vector2.Zero;
 
-            //if (_fireCooldown > 0)
-            //{
-            //    _fireCooldown -= deltaTime;
-            //}
+
+            WeaponComponent.Update(gameTime);
         }
 
         public void Accelerate(float acceleration)
         {
-            Velocity += Direction * acceleration;
+            Velocity = Direction * acceleration * MovementSpeed;
         }
 
         public void LookAt(Vector2 point)
         {
-            BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));// - 90f;
+            BarrelRotation = (float)Math.Atan2(point.Y - (BarrelPosition.Y + _barrelSprite.Origin.Y), point.X - (BarrelPosition.X + _barrelSprite.Origin.X));
+        }
+
+        public void Move(int direction)
+        {
+            var movementDelta = Direction * direction * MovementSpeed;
+            Position = Position.Translate(movementDelta.X, movementDelta.Y);
+            BarrelPosition = BarrelPosition.Translate(movementDelta.X, movementDelta.Y);
+        }
+
+        public void Rotate(float deltaTime)
+        {
+            Rotation += deltaTime * RotationSpeed;
+        }
+
+        public void Fire()
+        {
+            if (WeaponComponent.Fire())
+            {
+                Debug.WriteLine("Bang!");
+            }
         }
     }
 }

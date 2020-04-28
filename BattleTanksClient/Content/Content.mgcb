@@ -10,6 +10,9 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\BattleTanksCommon\bin\x64\Debug\netstandard2.0\MonoGame.Extended.Content.Pipeline.dll
+
+
 
 #---------------------------------- Content ---------------------------------#
 
@@ -42,6 +45,11 @@
 
 #begin allSprites_retina.xml
 /copy:allSprites_retina.xml
+
+#begin map01.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:map01.tmx
 
 #begin onlyObjects_default.png
 /importer:TextureImporter
