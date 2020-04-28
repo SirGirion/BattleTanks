@@ -64,10 +64,11 @@ namespace BattleTanksClient
             LoadMap(map);
         }
 
-        float _minCameraX;
-        float _maxCameraX;
-        float _minCameraY;
-        float _maxCameraY;
+        // Camera clamping variables
+        private float _minCameraX;
+        private float _maxCameraX;
+        private float _minCameraY;
+        private float _maxCameraY;
 
         public void LoadMap(TiledMap currentMap)
         {

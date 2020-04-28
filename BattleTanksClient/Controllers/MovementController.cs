@@ -54,8 +54,8 @@ namespace BattleTanksClient.Controllers
                 if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
                     _player.Rotate(deltaTime);
 
-                //if (keyboardState.IsKeyDown(Keys.Space) || mouseState.LeftButton == ButtonState.Pressed)
-                //    _player.Fire();
+                if (keyboardState.IsKeyDown(Keys.Space) || mouseState.LeftButton == ButtonState.Pressed)
+                    _player.Fire();
 
                 if (_previousMouseState.X != mouseState.X || _previousMouseState.Y != mouseState.Y)
                     _player.LookAt(_camera.ScreenToWorld(new Vector2(mouseState.X, mouseState.Y)));

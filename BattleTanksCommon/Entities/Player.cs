@@ -1,4 +1,5 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Entities.Components;
+using BattleTanksCommon.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -27,11 +28,7 @@ namespace BattleTanksCommon.Entities
         public Vector2 Position
         {
             get => _transform.Position;
-            set
-            {
-                _transform.Position = value;
-                
-            }
+            set => _transform.Position = value;
         }
 
         public Vector2 BarrelPosition
@@ -54,6 +51,8 @@ namespace BattleTanksCommon.Entities
 
         public Vector2 Velocity { get; set; }
 
+        public WeaponComponent WeaponComponent { get; set; }
+
         public Player(TextureRegion2D bodyTexture, TextureRegion2D barrelTexture)
         {
             _bodySprite = new Sprite(bodyTexture);
@@ -71,6 +70,7 @@ namespace BattleTanksCommon.Entities
                 Scale = Vector2.One,
                 Position = new Vector2(400, 240)
             };
+            WeaponComponent = new WeaponComponent("redBarrel", "bulletRed1", 1000);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -89,10 +89,8 @@ namespace BattleTanksCommon.Entities
             BarrelPosition += Velocity * deltaTime;
             Velocity = Vector2.Zero;
 
-            //if (_fireCooldown > 0)
-            //{
-            //    _fireCooldown -= deltaTime;
-            //}
+
+            WeaponComponent.Update(gameTime);
         }
 
         public void Accelerate(float acceleration)
@@ -115,6 +113,14 @@ namespace BattleTanksCommon.Entities
         public void Rotate(float deltaTime)
         {
             Rotation += deltaTime * RotationSpeed;
+        }
+
+        public void Fire()
+        {
+            if (WeaponComponent.Fire())
+            {
+                Debug.WriteLine("Bang!");
+            }
         }
     }
 }
