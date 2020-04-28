@@ -1,6 +1,7 @@
 ﻿using BattleTanksCommon.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended;
 using MonoGame.Extended.Input.InputListeners;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,9 @@ namespace BattleTanksClient.Controllers
     /// </summary>
     public class MovementController
     {
+        public MovementController(OrthographicCamera camera)
+        {
 
+        }
     }
 }

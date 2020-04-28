@@ -21,7 +21,6 @@ namespace BattleTanksClient
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Texture2D _testTexture;
         private TextureAtlas _atlas;
         private Player _player;
         //private MovementController _movementController;
@@ -78,19 +77,17 @@ namespace BattleTanksClient
 
             if (_player != null && !_player.IsDestroyed)
             {
-                const float acceleration = 5f;
-
                 if (keyboardState.IsKeyDown(Keys.W) || keyboardState.IsKeyDown(Keys.Up))
-                    _player.Move(-1);
+                    _player.Accelerate(-5f);
 
                 if (keyboardState.IsKeyDown(Keys.S) || keyboardState.IsKeyDown(Keys.Down))
-                    _player.Move(1);
+                    _player.Accelerate(5f);
 
                 if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
-                    _player.Rotation -= deltaTime * 3f;
+                    _player.Rotate(-deltaTime);
 
                 if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
-                    _player.Rotation += deltaTime * 3f;
+                    _player.Rotate(deltaTime);
 
                 //if (keyboardState.IsKeyDown(Keys.Space) || mouseState.LeftButton == ButtonState.Pressed)
                 //    _player.Fire();
@@ -98,7 +95,7 @@ namespace BattleTanksClient
                 if (_previousMouseState.X != mouseState.X || _previousMouseState.Y != mouseState.Y)
                     _player.LookAt(_camera.ScreenToWorld(new Vector2(mouseState.X, mouseState.Y)));
 
-                _camera.LookAt(_player.Position + _player.Velocity * 0.2f);
+                _camera.LookAt(_player.Position);
                 //_camera.Zoom = 1.0f - _player.Velocity.Length() / 500f;
             }
 

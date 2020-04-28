@@ -6,6 +6,7 @@ using MonoGame.Extended.Sprites;
 using MonoGame.Extended.TextureAtlases;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace BattleTanksCommon.Entities
@@ -18,9 +19,10 @@ namespace BattleTanksCommon.Entities
         private Sprite _bodySprite;
         private Sprite _barrelSprite;
 
-        public float MovementSpeed { get; set; } = 2.0f;
+        public float MovementSpeed { get; set; } = 32.0f;
+        public float RotationSpeed { get => 2.5f; }
 
-        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation) * MovementSpeed;
+        public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
 
         public Vector2 Position
         {
@@ -82,10 +84,11 @@ namespace BattleTanksCommon.Entities
         public override void Update(GameTime gameTime)
         {
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Debug.WriteLine(Velocity);
 
-            //Position += Velocity * deltaTime;
-            //BarrelPosition += Velocity * deltaTime;
-            Velocity *= 0.98f;
+            Position += Velocity * deltaTime;
+            BarrelPosition += Velocity * deltaTime;
+            Velocity = Vector2.Zero;
 
             //if (_fireCooldown > 0)
             //{
@@ -95,7 +98,7 @@ namespace BattleTanksCommon.Entities
 
         public void Accelerate(float acceleration)
         {
-            Velocity = Direction * acceleration;
+            Velocity = Direction * acceleration * MovementSpeed;
         }
 
         public void LookAt(Vector2 point)
@@ -108,6 +111,11 @@ namespace BattleTanksCommon.Entities
             var movementDelta = Direction * direction * MovementSpeed;
             Position = Position.Translate(movementDelta.X, movementDelta.Y);
             BarrelPosition = BarrelPosition.Translate(movementDelta.X, movementDelta.Y);
+        }
+
+        public void Rotate(float deltaTime)
+        {
+            Rotation += deltaTime * RotationSpeed;
         }
     }
 }
