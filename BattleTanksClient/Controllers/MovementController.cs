@@ -28,10 +28,36 @@ namespace BattleTanksClient.Controllers
 
         private MouseState _previousMouseState;
 
+        public enum MouseButtons
+        {
+            LeftButton,
+            MiddleButton,
+            RightButton,
+            XButton1,
+            XButton2
+        }
+
+        public Keys ForwardInput { get; set; }
+        public Keys BackwardInput { get; set; }
+        public Keys LeftInput { get; set; }
+        public Keys RightInput { get; set; }
+        public Keys UsePowerUp { get; set; }
+        public Keys ExitGame { get; set; }
+        public MouseButtons FireInputMouse { get; set; }
+        public Keys FireInputKeyboard { get; set; }
+
         public MovementController(Player player, OrthographicCamera camera)
         {
             _player = player;
             _camera = camera;
+            ForwardInput = Keys.W;
+            BackwardInput = Keys.S;
+            LeftInput = Keys.A;
+            RightInput = Keys.D;
+            UsePowerUp = Keys.E;
+            ExitGame = Keys.Escape;
+            FireInputMouse = MouseButtons.LeftButton;
+            FireInputKeyboard = Keys.None;
         }
 
         public void Update(GameTime gameTime)
@@ -42,19 +68,19 @@ namespace BattleTanksClient.Controllers
 
             if (_player != null && !_player.IsDestroyed)
             {
-                if (keyboardState.IsKeyDown(_player.ForwardInput))
+                if (keyboardState.IsKeyDown(this.ForwardInput))
                     _player.Accelerate(-5f);
 
-                if (keyboardState.IsKeyDown(_player.BackwardInput))
+                if (keyboardState.IsKeyDown(this.BackwardInput))
                     _player.Accelerate(5f);
 
-                if (keyboardState.IsKeyDown(_player.LeftInput))
+                if (keyboardState.IsKeyDown(this.LeftInput))
                     _player.Rotate(-deltaTime);
 
-                if (keyboardState.IsKeyDown(_player.RightInput))
+                if (keyboardState.IsKeyDown(this.RightInput))
                     _player.Rotate(deltaTime);
 
-                if (keyboardState.IsKeyDown(_player.FireInputKeyboard) || _player.CheckMouseState())
+                if (keyboardState.IsKeyDown(this.FireInputKeyboard) || this.CheckMouseState(mouseState))
                     _player.Fire();
 
                 if (_previousMouseState.X != mouseState.X || _previousMouseState.Y != mouseState.Y)
@@ -62,6 +88,25 @@ namespace BattleTanksClient.Controllers
 
                 //_camera.Zoom = 1.0f - _player.Velocity.Length() / 500f;
                 _previousMouseState = mouseState;
+            }
+        }
+
+        private bool CheckMouseState(MouseState mouseState)
+        {
+            switch (this.FireInputMouse)
+            {
+                case MouseButtons.LeftButton:
+                    return (mouseState.LeftButton == ButtonState.Pressed);
+                case MouseButtons.RightButton:
+                    return (mouseState.RightButton == ButtonState.Pressed);
+                case MouseButtons.MiddleButton:
+                    return (mouseState.MiddleButton == ButtonState.Pressed);
+                case MouseButtons.XButton1:
+                    return (mouseState.XButton1 == ButtonState.Pressed);
+                case MouseButtons.XButton2:
+                    return (mouseState.XButton2 == ButtonState.Pressed);
+                default:
+                    return false;
             }
         }
     }
