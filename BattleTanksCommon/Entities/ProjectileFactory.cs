@@ -41,19 +41,21 @@ namespace BattleTanksClient.Entities
             if (!_projectileTextures.TryGetValue(weapon.ProjectileName, out var texture))
             {
                 texture = _atlas.GetRegion(weapon.ProjectileName);
-                if (texture == null)
-                    throw new ArgumentException($"Invalid projectile name defined in WeaponComponent: {weapon.ProjectileName}");
-                _projectileTextures[weapon.ProjectileName] = texture;
+                _projectileTextures[weapon.ProjectileName] = texture 
+                    ?? throw new ArgumentException($"Invalid projectile name defined in WeaponComponent: {weapon.ProjectileName}");
             }
 
             // Spawn our entity
-            var projectile = _entityManager.AddEntity(new Projectile(texture, movementSpeed)
+            var projectile = _entityManager.AddEntity(new Projectile(texture, position, movementSpeed)
             {
-                Position = position,
-                Rotation = rotation
+                Rotation = rotation,
+                DamageSource = weapon.DamageSource
             });
             if (projectile == null)
+            {
                 Debug.WriteLine("Unable to add projectile.");
+                return;
+            }
             // Accelerate it
             projectile.Accelerate(movementSpeed);
             // Spawn the flash

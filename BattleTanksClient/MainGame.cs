@@ -25,9 +25,8 @@ namespace BattleTanksClient
         private Player _player;
         private MovementController _movementController;
         private OrthographicCamera _camera;
-        private MouseState _previousMouseState;
         private ViewportAdapter _viewportAdapter;
-        private IEntityManager _entityManager;
+        private EntityManager _entityManager;
         private TiledMapRenderer _mapRenderer;
         private ProjectileFactory _projectileFactory;
 
@@ -48,24 +47,28 @@ namespace BattleTanksClient
 
         protected override void LoadContent()
         {
-            _viewportAdapter = new ScalingViewportAdapter(GraphicsDevice, 1600, 900);
+            _viewportAdapter = new ScalingViewportAdapter(_graphics.GraphicsDevice, 1600, 900);
 
             _camera = new OrthographicCamera(_viewportAdapter);
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
 
             if (File.Exists(@"Content\allSprites_default.xml"))
             {
                 _atlas = TextureAtlasData.CreateFromFile(Content, @"Content\allSprites_default.xml");
                 _projectileFactory = new ProjectileFactory(_entityManager, _atlas);
-                _player = _entityManager.AddEntity(
-                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
-                );
             }
 
-            _movementController = new MovementController(_player, _camera);
+            
             var map = Content.Load<TiledMap>("map01");
-            _mapRenderer = new TiledMapRenderer(GraphicsDevice);
+            _mapRenderer = new TiledMapRenderer(_graphics.GraphicsDevice);
             LoadMap(map);
+            _player = _entityManager.AddEntity(
+                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
+                );
+            _entityManager.AddEntity(
+                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
+                );
+            _movementController = new MovementController(_player, _camera);
         }
 
         // Camera clamping variables
@@ -83,6 +86,8 @@ namespace BattleTanksClient
             _maxCameraX = currentMap.WidthInPixels - _minCameraX;
             _minCameraY = _camera.BoundingRectangle.Height / 2;
             _maxCameraY = currentMap.HeightInPixels - _minCameraY;
+
+            _entityManager.LoadMap(currentMap);
         }
 
         private Vector2 _cameraTarget = Vector2.Zero;

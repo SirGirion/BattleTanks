@@ -1,7 +1,9 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Entities.Components;
+using BattleTanksCommon.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
+using MonoGame.Extended.Collisions;
 using MonoGame.Extended.Sprites;
 using MonoGame.Extended.TextureAtlases;
 using System;
@@ -64,12 +66,16 @@ namespace BattleTanksCommon.Entities
         private Sprite _projectileSprite;
         private int _life;
 
-        public Projectile(TextureRegion2D texture, float movementSpeed)
+        public DamageSource DamageSource { get; set; }
+
+        public Projectile(TextureRegion2D texture, Vector2 position, float movementSpeed)
         {
             _transform = new Transform2
             {
+                Position = position,
                 Scale = Vector2.One
             };
+            Bounds = new RectangleF(_transform.Position.ToPoint(), new Size2(texture.Width, texture.Height));
             _projectileSprite = new Sprite(texture);
             MovementSpeed = movementSpeed;
             _life = ProjectileLifeTime;
@@ -85,6 +91,11 @@ namespace BattleTanksCommon.Entities
             base.Update(gameTime);
             if ((_life -= (int)gameTime.ElapsedGameTime.TotalMilliseconds) <= 0)
                 Destroy();
+        }
+
+        public override void OnCollision(CollisionEventArgs collisionInfo)
+        {
+            Destroy();
         }
     }
 }
