@@ -91,7 +91,7 @@ namespace BattleTanksClient
         {
             _mapRenderer.Update(gameTime);
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(_player.ExitGame))
                 Exit();
 
             // TODO: Add your update logic here

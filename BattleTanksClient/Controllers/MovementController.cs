@@ -42,19 +42,19 @@ namespace BattleTanksClient.Controllers
 
             if (_player != null && !_player.IsDestroyed)
             {
-                if (keyboardState.IsKeyDown(Keys.W) || keyboardState.IsKeyDown(Keys.Up))
+                if (keyboardState.IsKeyDown(_player.ForwardInput))
                     _player.Accelerate(-5f);
 
-                if (keyboardState.IsKeyDown(Keys.S) || keyboardState.IsKeyDown(Keys.Down))
+                if (keyboardState.IsKeyDown(_player.BackwardInput))
                     _player.Accelerate(5f);
 
-                if (keyboardState.IsKeyDown(Keys.A) || keyboardState.IsKeyDown(Keys.Left))
+                if (keyboardState.IsKeyDown(_player.LeftInput))
                     _player.Rotate(-deltaTime);
 
-                if (keyboardState.IsKeyDown(Keys.D) || keyboardState.IsKeyDown(Keys.Right))
+                if (keyboardState.IsKeyDown(_player.RightInput))
                     _player.Rotate(deltaTime);
 
-                if (keyboardState.IsKeyDown(Keys.Space) || mouseState.LeftButton == ButtonState.Pressed)
+                if (keyboardState.IsKeyDown(_player.FireInputKeyboard) || _player.CheckMouseState())
                     _player.Fire();
 
                 if (_previousMouseState.X != mouseState.X || _previousMouseState.Y != mouseState.Y)
