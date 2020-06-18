@@ -36,6 +36,8 @@ namespace BattleTanksCommon.Entities.Components
         /// </summary>
         public bool CanFire => _cooldown <= 0;
 
+        public DamageSource DamageSource { get; set; }
+
         /// <summary>
         /// Creates a new WeaponComponent object.
         /// </summary>
