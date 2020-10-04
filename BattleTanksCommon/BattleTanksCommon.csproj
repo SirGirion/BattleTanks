@@ -5,11 +5,13 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Platforms>x64</Platforms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="ENet-CSharp" Version="2.4.0" />
     <PackageReference Include="MonoGame.Extended" Version="3.7.0" />
+    <PackageReference Include="MonoGame.Extended.Collisions" Version="3.7.0" />
     <PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="3.7.0" />
     <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.8.0.13" />
     <PackageReference Include="NLog" Version="4.7.4" />
