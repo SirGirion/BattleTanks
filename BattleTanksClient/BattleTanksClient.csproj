@@ -12,7 +12,14 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Entities\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <None Remove="Entities\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Icon.ico" />
@@ -33,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ENet-CSharp" Version="2.4.0" />
     <PackageReference Include="MonoGame.Extended" Version="3.7.0" />
     <PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="3.7.0" />
     <PackageReference Include="MonoGame.Extended.Input" Version="3.7.0" />
@@ -45,7 +53,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
+    <Folder Include="Network\" />
   </ItemGroup>
 
 </Project>

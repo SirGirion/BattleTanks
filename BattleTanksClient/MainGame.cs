@@ -1,7 +1,9 @@
 ﻿using BattleTanksClient.Controllers;
 using BattleTanksClient.Entities;
+using BattleTanksClient.Network;
 using BattleTanksCommon.Entities;
 using BattleTanksCommon.KenneyAssets;
+using BattleTanksCommon.Network.Packets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -30,6 +32,7 @@ namespace BattleTanksClient
         private IEntityManager _entityManager;
         private TiledMapRenderer _mapRenderer;
         private ProjectileFactory _projectileFactory;
+        private NetworkClient _networkClient;
 
         public MainGame()
         {
@@ -44,6 +47,24 @@ namespace BattleTanksClient
         {
             // TODO: Add your initialization logic here
             base.Initialize();
+            _networkClient = new NetworkClient("127.0.0.1", 7000);
+            _networkClient.StartClient();
+            _networkClient.OnNewPlayerPacket += OnNewPlayerPacket;
+            _networkClient.OnEntitySpawnPacket += OnEntitySpawnPacket;
+            // Send a login packet to server
+            var packet = new LoginPacket()
+            {
+                MsgType = (byte)Packets.LOGIN_PACKET,
+                ClientId = _networkClient.ClientId,
+                PlayerId = _networkClient.PlayerId
+            };
+            _networkClient.EnqueuePacket(packet);
+        }
+
+        protected override void EndRun()
+        {
+            base.EndRun();
+            _networkClient.EndClient();
         }
 
         protected override void LoadContent()
@@ -135,6 +156,22 @@ namespace BattleTanksClient
             _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void OnNewPlayerPacket(object sender, NewPlayerPacket packet)
+        {
+            // Server broadcasts a player packet to everyone, make sure we don't double count ourselves
+            if (packet.PlayerId == _networkClient.PlayerId)
+                return;
+            var otherPlayer = _entityManager.AddEntity(
+                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
+                );
+            otherPlayer.SetPosition(packet.PlayerX, packet.PlayerX);
+        }
+
+        private void OnEntitySpawnPacket(object sender, EntitySpawnPacket packet)
+        {
+
         }
     }
 }

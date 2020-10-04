@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ENet;
+using System;
 
 namespace BattleTanksServer
 {
@@ -6,7 +7,15 @@ namespace BattleTanksServer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-        }
+            string host = "localhost";
+            ushort port = 7000;
+			if (args.Length >= 3)
+            {
+                host = args[1];
+                port = Convert.ToUInt16(args[2]);
+            }
+            var server = new Server(host, port);
+            server.StartServer();
+		}
     }
 }

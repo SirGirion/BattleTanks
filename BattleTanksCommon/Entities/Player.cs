@@ -59,6 +59,11 @@ namespace BattleTanksCommon.Entities
             _factory = projectileFactory;
         }
 
+        public void SetPosition(float x, float y)
+        {
+            Position = BarrelPosition = new Vector2(x, y);
+        }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_bodySprite, _transform);
