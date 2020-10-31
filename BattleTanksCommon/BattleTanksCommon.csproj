@@ -10,6 +10,7 @@
   
   <ItemGroup>
     <PackageReference Include="ENet-CSharp" Version="2.4.0" />
+    <PackageReference Include="MessagePack" Version="2.2.60" />
     <PackageReference Include="MonoGame.Extended" Version="3.7.0" />
     <PackageReference Include="MonoGame.Extended.Collisions" Version="3.7.0" />
     <PackageReference Include="MonoGame.Extended.Content.Pipeline" Version="3.7.0" />

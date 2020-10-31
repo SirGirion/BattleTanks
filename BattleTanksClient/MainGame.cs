@@ -16,11 +16,14 @@ using MonoGame.Extended.ViewportAdapters;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace BattleTanksClient
 {
     public class MainGame : Game
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private TextureAtlas _atlas;
@@ -48,16 +51,24 @@ namespace BattleTanksClient
             base.Initialize();
             _networkClient = new NetworkClient("127.0.0.1", 7000);
             _networkClient.StartClient();
-            _networkClient.OnNewPlayerPacket += OnNewPlayerPacket;
-            _networkClient.OnEntitySpawnPacket += OnEntitySpawnPacket;
-            // Send a login packet to server
             var packet = new LoginPacket()
             {
-                MsgType = (byte)Packets.LOGIN_PACKET,
-                ClientId = _networkClient.ClientId,
-                PlayerId = _networkClient.PlayerId
+                MsgType = (byte)Packets.LoginPacket,
+                Username = Encoding.UTF8.GetBytes("test"),
+                Password = Encoding.UTF8.GetBytes("test")
             };
             _networkClient.EnqueuePacket(packet);
+            _networkClient.OnLoginResponsePacket += OnLoginResponsePacket;
+            //_networkClient.OnNewPlayerPacket += OnNewPlayerPacket;
+            //_networkClient.OnEntitySpawnPacket += OnEntitySpawnPacket;
+            //// Send a login packet to server
+            //var packet = new LoginPacket()
+            //{
+            //    MsgType = (byte)Packets.LOGIN_PACKET,
+            //    Username = "test".AsSpan(),
+            //    PlayerId = _networkClient.PlayerId
+            //};
+            //_networkClient.EnqueuePacket(packet);
         }
 
         protected override void EndRun()
@@ -84,9 +95,6 @@ namespace BattleTanksClient
             _mapRenderer = new TiledMapRenderer(_graphics.GraphicsDevice);
             LoadMap(map);
             _player = _entityManager.AddEntity(
-                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
-                );
-            _entityManager.AddEntity(
                     new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
                 );
             _movementController = new MovementController(_player, _camera);
@@ -163,20 +171,24 @@ namespace BattleTanksClient
             base.Draw(gameTime);
         }
 
-        private void OnNewPlayerPacket(object sender, NewPlayerPacket packet)
-        {
-            // Server broadcasts a player packet to everyone, make sure we don't double count ourselves
-            if (packet.PlayerId == _networkClient.PlayerId)
-                return;
-            var otherPlayer = _entityManager.AddEntity(
-                    new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
-                );
-            otherPlayer.SetPosition(packet.PlayerX, packet.PlayerX);
-        }
+        //private void OnNewPlayerPacket(object sender, NewPlayerPacket packet)
+        //{
+        //    // Server broadcasts a player packet to everyone, make sure we don't double count ourselves
+        //    if (packet.PlayerId == _networkClient.PlayerId)
+        //        return;
+        //    var otherPlayer = _entityManager.AddEntity(
+        //            new Player(_atlas.GetRegion("tankBody_red"), _atlas.GetRegion("tankRed_barrel1"), _projectileFactory)
+        //        );
+        //    otherPlayer.SetPosition(packet.PlayerX, packet.PlayerX);
+        //}
 
-        private void OnEntitySpawnPacket(object sender, EntitySpawnPacket packet)
-        {
+        //private void OnEntitySpawnPacket(object sender, EntitySpawnPacket packet)
+        //{
 
+        //}
+        private void OnLoginResponsePacket(object sender, LoginResponsePacketArgs loginResponsePacketArgs)
+        {
+            Logger.Info($"Received a LoginResponse packet with response code: {loginResponsePacketArgs.Packet.LoginResponseCode}");
         }
     }
 }
