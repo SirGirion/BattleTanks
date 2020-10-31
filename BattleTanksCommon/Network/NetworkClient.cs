@@ -1,5 +1,6 @@
 ﻿using BattleTanksCommon.Network.Packets;
 using ENet;
+using MessagePack;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,18 +16,21 @@ namespace BattleTanksClient.Network
     /// </summary>
     public class NetworkClient
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         private Address _address;
         private Host _client;
         private Peer _peer;
 
         private bool _running;
-        private BlockingCollection<INetworkPacket> _outboundPackets;
+        private BlockingCollection<NetworkPacket> _outboundPackets;
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        public EventHandler<LoginPacket> OnLoginPacket;
-        public EventHandler<NewPlayerPacket> OnNewPlayerPacket;
-        public EventHandler<PlayerDeltaUpdatePacket> OnPlayerDeltaUpdatePacket;
-        public EventHandler<EntitySpawnPacket> OnEntitySpawnPacket;
+        public EventHandler<LoginPacketArgs> OnLoginPacket;
+        public EventHandler<NewPlayerPacketArgs> OnNewPlayerPacket;
+        public EventHandler<PlayerDeltaUpdatePacketArgs> OnPlayerDeltaUpdatePacket;
+        public EventHandler<EntitySpawnPacketArgs> OnEntitySpawnPacket;
+        public EventHandler<LoginResponsePacketArgs> OnLoginResponsePacket;
 
         public int ClientId { get; }
         public int PlayerId { get; }
@@ -36,7 +40,7 @@ namespace BattleTanksClient.Network
             _address = new Address();
             _address.SetIP(ip);
             _address.Port = port;
-            _outboundPackets = new BlockingCollection<INetworkPacket>(1000);
+            _outboundPackets = new BlockingCollection<NetworkPacket>(1000);
             var rand = new Random();
             ClientId = rand.Next();
             PlayerId = rand.Next();
@@ -86,7 +90,7 @@ namespace BattleTanksClient.Network
                             case EventType.Receive:
                                 Debug.WriteLine("Packet received - Channel ID: " + netEvent.ChannelID + ", Data length: " + netEvent.Packet.Length);
                                 // Convert packet data back to a INetworkPacket, notify subscribers
-                                Parse((byte*)netEvent.Packet.Data.ToPointer());
+                                Parse(netEvent);
                                 netEvent.Packet.Dispose();
                                 break;
                         }
@@ -99,7 +103,7 @@ namespace BattleTanksClient.Network
             {
                 while (_running && !_outboundPackets.IsCompleted)
                 {
-                    INetworkPacket outboundPacket = null;
+                    NetworkPacket outboundPacket = null;
                     try
                     {
                         outboundPacket = _outboundPackets.Take();
@@ -132,35 +136,38 @@ namespace BattleTanksClient.Network
         /// </summary>
         /// <param name="packet">The packet to send.</param>
         /// <returns>True if the packet was enqueued.</returns>
-        public bool EnqueuePacket(INetworkPacket packet)
+        public bool EnqueuePacket(NetworkPacket packet)
         {
             Debug.WriteLine("Enqueuing packet");
             return _outboundPackets.TryAdd(packet);
         }
 
         //protected virtual void OnPacketRecevied
-        private unsafe void Parse(byte* data)
+        private unsafe void Parse(Event netEvent)
         {
-            byte msgType = *data;
-            if (msgType == (byte)Packets.PLAYER_DELTA_UPDATE_PACKET)
+            var buffer = new byte[netEvent.Packet.Length];
+            netEvent.Packet.CopyTo(buffer);
+            var packet = MessagePackSerializer.Deserialize<NetworkPacket>(buffer);
+            switch (packet)
             {
-                OnPlayerDeltaUpdatePacket?.Invoke(this, *(PlayerDeltaUpdatePacket*)data);
-            }
-            else if (msgType == (byte)Packets.ENTITY_SPAWN_PACKET)
-            {
-                OnEntitySpawnPacket?.Invoke(this, *(EntitySpawnPacket*)data);
-            }
-            else if (msgType == (byte)Packets.NEW_PLAYER_PACKET)
-            {
-                OnNewPlayerPacket?.Invoke(this, *(NewPlayerPacket*)data);
-            }
-            else if (msgType == (byte)Packets.LOGIN_PACKET)
-            {
-                OnLoginPacket?.Invoke(this, *(LoginPacket*)data);
-            }
-            else
-            {
-
+                case PlayerDeltaUpdatePacket data:
+                    OnPlayerDeltaUpdatePacket?.Invoke(this, new PlayerDeltaUpdatePacketArgs(netEvent, data));
+                    break;
+                case EntitySpawnPacket data:
+                    OnEntitySpawnPacket?.Invoke(this, new EntitySpawnPacketArgs(netEvent, data));
+                    break;
+                case NewPlayerPacket data:
+                    OnNewPlayerPacket?.Invoke(this, new NewPlayerPacketArgs(netEvent, data));
+                    break;
+                case LoginPacket data:
+                    OnLoginPacket?.Invoke(this, new LoginPacketArgs(netEvent, data));
+                    break;
+                case LoginResponsePacket data:
+                    OnLoginResponsePacket?.Invoke(this, new LoginResponsePacketArgs(netEvent, data));
+                    break;
+                default:
+                    Logger.Info($"Unknown msgType encountered: {packet.MsgType}");
+                    break;
             }
         }
     }

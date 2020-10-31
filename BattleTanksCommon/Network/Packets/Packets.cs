@@ -1,77 +1,99 @@
-﻿using System.Runtime.InteropServices;
+﻿using MessagePack;
 
 namespace BattleTanksCommon.Network.Packets
 {
-    public interface INetworkPacket
+    [Union(0, typeof(LoginPacket))]
+    [Union(1, typeof(NewPlayerPacket))]
+    [Union(2, typeof(PlayerDeltaUpdatePacket))]
+    [Union(3, typeof(EntitySpawnPacket))]
+    [Union(4, typeof(LoginResponsePacket))]
+    [Union(5, typeof(LobbyStateChangePacket))]
+    public abstract class NetworkPacket
     {
+        [Key(0)]
+        public byte MsgType;
     }
 
     public enum Packets : byte
     {
-        LOGIN_PACKET = 1,
-        NEW_PLAYER_PACKET = 2,
-        PLAYER_DELTA_UPDATE_PACKET = 3,
-        ENTITY_SPAWN_PACKET = 4
+        LoginPacket = 1,
+        NewPlayerPacket = 2,
+        PlayerDeltaUpdatePacket = 3,
+        EntitySpawnPacket = 4,
+        LoginResponsePacket = 5
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LoginPacket : INetworkPacket
+    public enum LoginResponseCode : byte
     {
-        public byte MsgType;
-        public int ClientId;
-        public int PlayerId;
+        Success = 0,
+        InvalidUserPass = 1
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct NewPlayerPacket : INetworkPacket
+    [MessagePackObject]
+    public class LoginPacket : NetworkPacket
     {
-        public byte MsgType;
+        [Key(1)]
+        public byte[] Username;
+        [Key(2)]
+        public byte[] Password;
+    }
+
+    [MessagePackObject]
+    public class NewPlayerPacket : NetworkPacket
+    {
+        [Key(1)]
         public int PlayerId;
+        [Key(2)]
         public int PlayerX;
+        [Key(3)]
         public int PlayerY;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct PlayerDeltaUpdatePacket : INetworkPacket
+    [MessagePackObject]
+    public class PlayerDeltaUpdatePacket : NetworkPacket
     {
-        public byte MsgType;
+        [Key(1)]
         public int PlayerId;
+        [Key(2)]
         public int DeltaPlayerX;
+        [Key(3)]
         public int DeltaPlayerY;
+        [Key(4)]
         public short DeltaPlayerRotation;
+        [Key(5)]
         public int DeltaPlayerVelocityX;
+        [Key(6)]
         public int DeltaPlayerVelocityY;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct EntitySpawnPacket : INetworkPacket
+    [MessagePackObject]
+    public class EntitySpawnPacket : NetworkPacket
     {
-        public byte MsgType;
+        [Key(1)]
         public uint EntityId;
+        [Key(2)]
         public int EntityX;
+        [Key(3)]
         public int EntityY;
+        [Key(4)]
         public short Rotation;
-        public int VelocityX;
-        public int VelocityY;
+        [Key(5)]
+        public float VelocityX;
+        [Key(6)]
+        public float VelocityY;
     }
 
-    public class NetworkHelpers
+    [MessagePackObject]
+    public class LoginResponsePacket : NetworkPacket
     {
-        /// <summary>
-        /// Tries to convert a float to quasi-fixed point representation, max float value
-        /// supported is int.MAX_VALUE / places
-        /// </summary>
-        /// <param name="value">The floating point value</param>
-        /// <param name="places"></param>
-        /// <returns></returns>
-        public int ToFixedPoint(float value, int places = 1000)
-        {
-            return (int)(value * places);
-        }
+        [Key(1)]
+        public byte LoginResponseCode;
+    }
 
-        public float FromFixedPoint(int value, int places = 1000)
-        {
-            return (float)value / places;
-        }
+    [MessagePackObject]
+    public class LobbyStateChangePacket : NetworkPacket
+    {
+        [Key(1)]
+        public byte LobbyStateCode;
     }
 }
