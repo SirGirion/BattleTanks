@@ -1,4 +1,4 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Network.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     /// <summary>
     /// Abstract class for entities that move. Extend this class if custom
@@ -15,25 +15,28 @@ namespace BattleTanksCommon.Entities
     /// </summary>
     public abstract class BasicMovingEntity : Entity, IMoveableEntity, IRotatableEntity, ICollisionActor
     {
-        protected Transform2 _transform;
+        protected Transform2 _positionTransform;
 
         public Vector2 Direction => Vector2.UnitX.Rotate(Rotation);
         public float Rotation
         {
-            get => _transform.Rotation - MathHelper.ToRadians(90);
-            set => _transform.Rotation = value + MathHelper.ToRadians(90);
+            get => _positionTransform.Rotation - MathHelper.ToRadians(90);
+            set => _positionTransform.Rotation = value + MathHelper.ToRadians(90);
         }
         public float RotationSpeed { get; set; } = 0.0f;
 
         public Vector2 Position
         {
-            get => _transform.Position;
+            get => _positionTransform.Position;
             set
             {
-                _transform.Position = value;
-                Bounds.Position = _transform.Position;
+                _positionTransform.Position = value;
+                Bounds.Position = _positionTransform.Position;
             }
         }
+
+        public Transform2 PositionTransform => _positionTransform;
+
         public Vector2 Velocity { get; set; }
 
         public float MovementSpeed { get; set; } = 0.0f;
@@ -43,6 +46,13 @@ namespace BattleTanksCommon.Entities
         public void Accelerate(float acceleration)
         {
             Velocity = Direction * acceleration * MovementSpeed;
+        }
+
+        private int _rotationDirection;
+
+        public void Rotate(int direction)
+        {
+            _rotationDirection = direction;
         }
 
         public void Rotate(float deltaTime)
@@ -62,6 +72,7 @@ namespace BattleTanksCommon.Entities
         public override void Update(GameTime gameTime)
         {
             var deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Rotation += deltaTime * _rotationDirection * RotationSpeed;
 
             Position += Velocity * deltaTime;
         }

@@ -28,12 +28,11 @@ namespace BattleTanksClient.Network
 
         public EventHandler<LoginPacketArgs> OnLoginPacket;
         public EventHandler<NewPlayerPacketArgs> OnNewPlayerPacket;
-        public EventHandler<PlayerDeltaUpdatePacketArgs> OnPlayerDeltaUpdatePacket;
+        public EventHandler<PlayerUpdatePacketArgs> OnPlayerUpdatePacket;
         public EventHandler<EntitySpawnPacketArgs> OnEntitySpawnPacket;
         public EventHandler<LoginResponsePacketArgs> OnLoginResponsePacket;
-
-        public int ClientId { get; }
-        public int PlayerId { get; }
+        public EventHandler<LobbyStateChangePacketArgs> OnLobbyStateChangePacket;
+        public EventHandler<EntityRemovedPacketArgs> OnEntityRemovedPacket;
 
         public NetworkClient(string ip, ushort port)
         {
@@ -41,9 +40,6 @@ namespace BattleTanksClient.Network
             _address.SetIP(ip);
             _address.Port = port;
             _outboundPackets = new BlockingCollection<NetworkPacket>(1000);
-            var rand = new Random();
-            ClientId = rand.Next();
-            PlayerId = rand.Next();
         }
 
         public unsafe void StartClient()
@@ -51,12 +47,12 @@ namespace BattleTanksClient.Network
             // Initialize ENet
             Library.Initialize();
             _running = true;
-            _client = new Host();
-            _client.Create();
-            _peer = _client.Connect(_address);
             // Start thread for listening to incoming packets
             Task.Run(() =>
             {
+                _client = new Host();
+                _client.Create();
+                _peer = _client.Connect(_address);
                 while (_running)
                 {
                     var polled = false;
@@ -75,20 +71,20 @@ namespace BattleTanksClient.Network
                                 break;
 
                             case EventType.Connect:
-                                Debug.WriteLine("Client connected to ID: " + _peer.ID);
+                                Logger.Info("Client connected to ID: " + _peer.ID);
                                 //SendLogin();
                                 break;
 
                             case EventType.Disconnect:
-                                Debug.WriteLine("Client disconnected server");
+                                Logger.Info("Client disconnected server");
                                 break;
 
                             case EventType.Timeout:
-                                Debug.WriteLine("Client connection timeout");
+                                Logger.Info("Client connection timeout");
                                 break;
 
                             case EventType.Receive:
-                                Debug.WriteLine("Packet received - Channel ID: " + netEvent.ChannelID + ", Data length: " + netEvent.Packet.Length);
+                                Logger.Info("Packet received - Channel ID: " + netEvent.ChannelID + ", Data length: " + netEvent.Packet.Length);
                                 // Convert packet data back to a INetworkPacket, notify subscribers
                                 Parse(netEvent);
                                 netEvent.Packet.Dispose();
@@ -96,7 +92,14 @@ namespace BattleTanksClient.Network
                         }
                     }
                 }
-                _client?.Flush();
+                try
+                {
+                    _client?.Flush();
+                }
+                catch (InvalidOperationException)
+                {
+                    Logger.Warn("Client disconnected too soon.");
+                }
             });
             // Start thread for sending outbound packets
             Task.Run(() =>
@@ -114,7 +117,7 @@ namespace BattleTanksClient.Network
                     {
                         Debug.WriteLine("Sending packet");
                         var outboundNetworkPacket = default(Packet);
-                        outboundNetworkPacket.Create(outboundPacket.ToByteArray(), PacketFlags.Reliable);
+                        outboundNetworkPacket.Create(outboundPacket.ToByteArray(), PacketFlags.Unsequenced);
                         _peer.Send(0, ref outboundNetworkPacket);
                     }
                 }
@@ -150,8 +153,8 @@ namespace BattleTanksClient.Network
             var packet = MessagePackSerializer.Deserialize<NetworkPacket>(buffer);
             switch (packet)
             {
-                case PlayerDeltaUpdatePacket data:
-                    OnPlayerDeltaUpdatePacket?.Invoke(this, new PlayerDeltaUpdatePacketArgs(netEvent, data));
+                case PlayerUpdatePacket data:
+                    OnPlayerUpdatePacket?.Invoke(this, new PlayerUpdatePacketArgs(netEvent, data));
                     break;
                 case EntitySpawnPacket data:
                     OnEntitySpawnPacket?.Invoke(this, new EntitySpawnPacketArgs(netEvent, data));
@@ -164,6 +167,12 @@ namespace BattleTanksClient.Network
                     break;
                 case LoginResponsePacket data:
                     OnLoginResponsePacket?.Invoke(this, new LoginResponsePacketArgs(netEvent, data));
+                    break;
+                case LobbyStateChangePacket data:
+                    OnLobbyStateChangePacket?.Invoke(this, new LobbyStateChangePacketArgs(netEvent, data));
+                    break;
+                case EntityRemovedPacket data:
+                    OnEntityRemovedPacket?.Invoke(this, new EntityRemovedPacketArgs(netEvent, data));
                     break;
                 default:
                     Logger.Info($"Unknown msgType encountered: {packet.MsgType}");

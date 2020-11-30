@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace BattleTanksCommon.Entities.Components
+namespace BattleTanksCommon.Network.Entities.Components
 {
     public class WeaponComponent
     {

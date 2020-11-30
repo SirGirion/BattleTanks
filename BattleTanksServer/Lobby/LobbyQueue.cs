@@ -1,9 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BattleTanksCommon.Network.Packets;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ENet;
 
 namespace BattleTanksServer.Lobby
 {
@@ -34,7 +36,9 @@ namespace BattleTanksServer.Lobby
         /// List of all currently activate lobbies.
         /// </summary>
         private List<ILobby> _lobbies;
-        private Dictionary<int, ConcurrentBag<int>> _lobbyQueues;
+        private Dictionary<int, ConcurrentBag<Tuple<Peer, int>>> _lobbyQueues;
+
+        private int _lastLobbyId;
 
         /// <summary>
         /// Load configs for the various types of lobbies
@@ -43,10 +47,27 @@ namespace BattleTanksServer.Lobby
         {
             _server = server;
             _lobbies = new List<ILobby>();
-            _lobbyQueues = new Dictionary<int, ConcurrentBag<int>>();
+            _lobbyQueues = new Dictionary<int, ConcurrentBag<Tuple<Peer, int>>>();
             // Initialize the queues per lobby type
             foreach (var lobbyId in LobbyTypes)
-                _lobbyQueues[lobbyId] = new ConcurrentBag<int>();
+                _lobbyQueues[lobbyId] = new ConcurrentBag<Tuple<Peer, int>>();
+            _server.NetworkServer.OnLobbyStateChangePacket += OnLobbyStateChangePacket;
+            _server.NetworkServer.OnDisconnect += OnDisconnect;
+        }
+
+        private void OnLobbyStateChangePacket(object sender, LobbyStateChangePacketArgs args)
+        {
+            var packet = args.Packet;
+            if (packet.LobbyStateCode == LobbyStateCode.JoinLobbyRequest)
+            {
+                AddPlayerToQueue(args.NetEvent, packet.Data, packet.PlayerId);
+            }
+        }
+
+        private void OnDisconnect(object sender, Peer peer)
+        {
+            // Try to remove the peer from the queues
+
         }
 
         public void Update(GameTime gameTime)
@@ -58,12 +79,12 @@ namespace BattleTanksServer.Lobby
                 // We have enough people for a lobby, take N players and put them in a lobby
                 if (players.Count >= LobbyPlayerSizes[idAndPlayers.Key])
                 {
-                    var lobby = new Lobby(_server);
+                    var lobby = new Lobby(_server, ++_lastLobbyId);
                     for (var i = 0; i < LobbyPlayerSizes[idAndPlayers.Key]; i++)
                     {
-                        if (players.TryTake(out var playerId))
+                        if (players.TryTake(out var peerPlayerId))
                         {
-                            lobby.AddPlayer(playerId);
+                            lobby.AddPlayer(peerPlayerId);
                         }
                     }
                     // Check that there is at least N/2 + 1 players in the lobby in case somehow people left.
@@ -77,7 +98,10 @@ namespace BattleTanksServer.Lobby
             foreach (var lobby in _lobbies.Where(l => !l.IsFinished).ToArray())
                 lobby.Update(gameTime);
             foreach (var lobby in _lobbies.Where(l => l.IsFinished).ToArray())
+            {
+                Logger.Info($"Lobby ID({lobby.LobbyId}) finished.");
                 _lobbies.Remove(lobby);
+            }
         }
 
         /// <summary>
@@ -85,14 +109,17 @@ namespace BattleTanksServer.Lobby
         /// </summary>
         /// <param name="lobbyType"></param>
         /// <param name="playerId"></param>
-        public void AddPlayerToQueue(int lobbyType, int playerId)
+        public void AddPlayerToQueue(Event netEvent, int lobbyType, int playerId)
         {
             if (!_lobbyQueues.ContainsKey(lobbyType))
             {
                 Logger.Warn($"User {playerId} requested a lobby type ({lobbyType}) that does not exist.");
                 return;
             }
-            _lobbyQueues[lobbyType].Add(playerId);
+            _lobbyQueues[lobbyType].Add(Tuple.Create(netEvent.Peer, playerId));
+            // Send a packet telling client they're in a queue
+            var packet = LobbyStateChangePacket.CreatePacket(LobbyStateCode.PlayerInLobbyQueue, playerId, -1);
+            _server.NetworkServer.SendResponsePacket(netEvent.Peer, packet);
         }
     }
 }

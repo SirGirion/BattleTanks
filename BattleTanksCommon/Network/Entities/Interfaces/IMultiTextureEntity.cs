@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities.Interfaces
+namespace BattleTanksCommon.Network.Entities.Interfaces
 {
     public interface IMultiTextureEntity
     {

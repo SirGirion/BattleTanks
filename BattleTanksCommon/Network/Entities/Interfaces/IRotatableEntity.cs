@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities.Interfaces
+namespace BattleTanksCommon.Network.Entities.Interfaces
 {
     /// <summary>
     /// Interface for entities that can rotate.

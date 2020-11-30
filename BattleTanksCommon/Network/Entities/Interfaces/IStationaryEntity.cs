@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities.Interfaces
+namespace BattleTanksCommon.Network.Entities.Interfaces
 {
     /// <summary>
     /// Entity that exists at a certain point/rotation.

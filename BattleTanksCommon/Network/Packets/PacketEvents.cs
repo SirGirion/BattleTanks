@@ -29,16 +29,16 @@ namespace BattleTanksCommon.Network.Packets
         public NewPlayerPacket Packet { get; }
     }
 
-    public class PlayerDeltaUpdatePacketArgs : EventArgs
+    public class PlayerUpdatePacketArgs : EventArgs
     {
-        public PlayerDeltaUpdatePacketArgs(Event netEvent, PlayerDeltaUpdatePacket packet)
+        public PlayerUpdatePacketArgs(Event netEvent, PlayerUpdatePacket packet)
         {
             NetEvent = netEvent;
             Packet = packet;
         }
 
         public Event NetEvent { get; }
-        public PlayerDeltaUpdatePacket Packet { get; }
+        public PlayerUpdatePacket Packet { get; }
     }
 
     public class EntitySpawnPacketArgs : EventArgs
@@ -63,5 +63,53 @@ namespace BattleTanksCommon.Network.Packets
 
         public Event NetEvent { get; }
         public LoginResponsePacket Packet { get; }
+    }
+
+    public class LobbyStateChangePacketArgs : EventArgs
+    {
+        public LobbyStateChangePacketArgs(Event netEvent, LobbyStateChangePacket packet)
+        {
+            NetEvent = netEvent;
+            Packet = packet;
+        }
+
+        public Event NetEvent { get; }
+        public LobbyStateChangePacket Packet { get; }
+    }
+
+    public class KeyPressPacketArgs : EventArgs
+    {
+        public KeyPressPacketArgs(Event netEvent, KeyPressPacket packet)
+        {
+            NetEvent = netEvent;
+            Packet = packet;
+        }
+
+        public Event NetEvent { get; }
+        public KeyPressPacket Packet { get; }
+    }
+
+    public class MouseStatePacketArgs : EventArgs
+    {
+        public MouseStatePacketArgs(Event netEvent, MouseStatePacket packet)
+        {
+            NetEvent = netEvent;
+            Packet = packet;
+        }
+
+        public Event NetEvent { get; }
+        public MouseStatePacket Packet { get; }
+    }
+
+    public class EntityRemovedPacketArgs : EventArgs
+    {
+        public EntityRemovedPacketArgs(Event netEvent, EntityRemovedPacket packet)
+        {
+            NetEvent = netEvent;
+            Packet = packet;
+        }
+
+        public Event NetEvent { get; }
+        public EntityRemovedPacket Packet { get; }
     }
 }

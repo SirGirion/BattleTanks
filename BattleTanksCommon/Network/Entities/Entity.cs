@@ -4,11 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     public abstract class Entity
     {
         public bool IsDestroyed { get; private set; }
+
+        public int Id { get; set; }
 
         protected Entity()
         {

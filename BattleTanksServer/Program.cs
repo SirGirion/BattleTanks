@@ -14,8 +14,11 @@ namespace BattleTanksServer
                 host = args[1];
                 port = Convert.ToUInt16(args[2]);
             }
-            var server = new Server(host, port);
-            server.StartServer();
+            using (var server = new Server(host, port))
+            {
+                server.StartServer();
+                server.Run();
+            }
 		}
     }
 }

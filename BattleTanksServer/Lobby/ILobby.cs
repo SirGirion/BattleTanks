@@ -1,4 +1,5 @@
-﻿using BattleTanksCommon.Entities;
+﻿using BattleTanksCommon.Network.Entities;
+using ENet;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,8 @@ namespace BattleTanksServer.Lobby
     /// </summary>
     public interface ILobby
     {
-        void AddPlayer(int playerId);
-        void AddPlayer(Player player);
+        void AddPlayer(Tuple<Peer, int> player);
         void RemovePlayer(int playerId);
-        void RemovePlayer(Player player);
         void StartLobby();
         void EndLobby();
         /// <summary>
@@ -24,5 +23,6 @@ namespace BattleTanksServer.Lobby
         void Update(GameTime gameTime);
         bool IsFinished { get; }
         int PlayerCount { get; }
+        int LobbyId { get; }
     }
 }

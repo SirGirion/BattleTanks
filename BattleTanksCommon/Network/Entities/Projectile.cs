@@ -1,5 +1,5 @@
-﻿using BattleTanksCommon.Entities.Components;
-using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Network.Entities.Components;
+using BattleTanksCommon.Network.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     public class ProjectileFlashEffect : Entity, IStationaryEntity
     {
@@ -70,12 +70,12 @@ namespace BattleTanksCommon.Entities
 
         public Projectile(TextureRegion2D texture, Vector2 position, float movementSpeed)
         {
-            _transform = new Transform2
+            _positionTransform = new Transform2
             {
                 Position = position,
                 Scale = Vector2.One
             };
-            Bounds = new RectangleF(_transform.Position.ToPoint(), new Size2(texture.Width, texture.Height));
+            Bounds = new RectangleF(_positionTransform.Position.ToPoint(), new Size2(texture.Width, texture.Height));
             _projectileSprite = new Sprite(texture);
             MovementSpeed = movementSpeed;
             _life = ProjectileLifeTime;
@@ -83,7 +83,7 @@ namespace BattleTanksCommon.Entities
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_projectileSprite, _transform);
+            spriteBatch.Draw(_projectileSprite, _positionTransform);
         }
 
         public override void Update(GameTime gameTime)

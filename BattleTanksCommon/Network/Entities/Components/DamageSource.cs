@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities.Components
+namespace BattleTanksCommon.Network.Entities.Components
 {
     public enum DamageType
     {

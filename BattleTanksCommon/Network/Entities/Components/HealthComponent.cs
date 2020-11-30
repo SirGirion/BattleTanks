@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BattleTanksCommon.Entities.Components
+﻿namespace BattleTanksCommon.Network.Entities.Components
 {
     public class HealthComponent
     {

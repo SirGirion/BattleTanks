@@ -1,6 +1,6 @@
-﻿using BattleTanksCommon.Entities.Components;
+﻿using BattleTanksCommon.Network.Entities.Components;
 
-namespace BattleTanksCommon.Entities.Interfaces
+namespace BattleTanksCommon.Network.Entities.Interfaces
 {
     public interface IDamagableEntity
     {

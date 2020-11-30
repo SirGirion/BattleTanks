@@ -1,4 +1,4 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Network.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     /// <summary>
     /// Entity whose sole purpose is to act as a collision entity.

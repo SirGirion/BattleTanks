@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     public interface IEntityManager
     {
@@ -39,9 +39,17 @@ namespace BattleTanksCommon.Entities
             return entity;
         }
 
+        public bool RemoveEntity(int entityId)
+        {
+            var removed = _entities.RemoveAll(e => e.Id == entityId);
+            if (removed > 1)
+                throw new InvalidOperationException($"More than one entity had ID {entityId}");
+            return removed == 1;
+        }
+
         public void Update(GameTime gameTime)
         {
-            foreach (var entity in _entities.Where(e => !e.IsDestroyed))
+            foreach (var entity in _entities.Where(e => !e.IsDestroyed).ToList())
             {
                 entity.Update(gameTime);
             }
@@ -57,14 +65,28 @@ namespace BattleTanksCommon.Entities
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach (var entity in _entities.Where(e => !e.IsDestroyed))
+            foreach (var entity in _entities.Where(e => !e.IsDestroyed).ToList())
             {
                 entity.Draw(spriteBatch);
             }
         }
+        
+        public IEnumerable<T> GetEntitiesOfType<T>()
+        {
+            return _entities.Where(e => e.GetType() == typeof(T)).Cast<T>();
+        }
+
+        public IEnumerable<T> GetEntitiesOfType<T>(Func<T, bool> predicate)
+        {
+            return GetEntitiesOfType<T>().Where(predicate);
+        }
 
         public void LoadMap(TiledMap map)
         {
+            if (map == null)
+            {
+                map = new TiledMap("default", 100, 100, 32, 32, TiledMapTileDrawOrder.LeftDown, TiledMapOrientation.Orthogonal);
+            }
             _collisionSpace = new CollisionComponent(new RectangleF(-1, -1, map.WidthInPixels + 2, map.HeightInPixels + 2));
             // Setup the fake walls
             var leftWall = new DummyCollisionEntity();

@@ -1,5 +1,5 @@
-﻿using BattleTanksCommon.Entities;
-using BattleTanksCommon.Entities.Components;
+﻿using BattleTanksCommon.Network.Entities;
+using BattleTanksCommon.Network.Entities.Components;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended.TextureAtlases;
 using System;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace BattleTanksClient.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     public class ProjectileFactory
     {

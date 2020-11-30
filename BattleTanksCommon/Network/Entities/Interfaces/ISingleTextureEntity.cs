@@ -1,4 +1,4 @@
-﻿namespace BattleTanksCommon.Entities.Interfaces
+﻿namespace BattleTanksCommon.Network.Entities.Interfaces
 {
     /// <summary>
     /// Interface for any entity that only needs to draw one texture.

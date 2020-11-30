@@ -1,11 +1,11 @@
-﻿using BattleTanksCommon.Entities.Interfaces;
+﻿using BattleTanksCommon.Network.Entities.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BattleTanksCommon.Entities
+namespace BattleTanksCommon.Network.Entities
 {
     public class BasicStationaryEntity : Entity, IStationaryEntity
     {
