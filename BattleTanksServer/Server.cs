@@ -30,7 +30,6 @@ namespace BattleTanksServer
         public static d_sdl_setenv SDL_setenv;
 
         internal NetworkServer NetworkServer { get; }
-        private EntityManager _manager;
         private LobbyQueue _lobbyQueue;
         private Random _rand;
 
@@ -47,7 +46,6 @@ namespace BattleTanksServer
             Library.Initialize();
             NetworkServer = new NetworkServer(host, port);
             NetworkServer.OnLoginPacket += OnLoginPacket;
-            _manager = new EntityManager();
             _lobbyQueue = new LobbyQueue(this);
             _rand = new Random();
         }

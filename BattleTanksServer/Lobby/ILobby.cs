@@ -24,5 +24,6 @@ namespace BattleTanksServer.Lobby
         bool IsFinished { get; }
         int PlayerCount { get; }
         int LobbyId { get; }
+        IReadOnlyCollection<Peer> PlayerConnections { get; }
     }
 }

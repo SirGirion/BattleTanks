@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using BattleTanksClient.Network;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Collisions;
@@ -14,9 +15,17 @@ namespace BattleTanksCommon.Network.Entities
     {
         T AddEntity<T>(T entity) where T : Entity;
 
+        bool RemoveEntity(int entityId);
+
         void Update(GameTime gameTime);
 
         void Draw(SpriteBatch spriteBatch);
+
+        IEnumerable<T> GetEntitiesOfType<T>();
+
+        IEnumerable<T> GetEntitiesOfType<T>(Func<T, bool> predicate);
+
+        void LoadMap(TiledMap map);
     }
 
     public class EntityManager : IEntityManager

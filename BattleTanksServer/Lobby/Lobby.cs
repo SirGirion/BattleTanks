@@ -1,5 +1,6 @@
 ﻿using BattleTanksCommon.Network.Entities;
 using BattleTanksCommon.Network.Packets;
+using BattleTanksServer.Game.Entities;
 using ENet;
 using Microsoft.Xna.Framework;
 using System;
@@ -22,21 +23,22 @@ namespace BattleTanksServer.Lobby
         /// <summary>
         /// Server instance this lobby is running on.
         /// </summary>
-        private Server _server;
+        internal Server Server { get; }
         private Dictionary<int, Peer> _players;
+        public IReadOnlyCollection<Peer> PlayerConnections => _players.Values;
 
-        private EntityManager _entityManager;
+        private IEntityManager _entityManager;
 
         public Lobby(Server server, int lobbyId)
         {
-            _server = server;
+            Server = server;
             _players = new Dictionary<int, Peer>();
-            _server.NetworkServer.OnDisconnect += OnDisconnect;
-            _server.NetworkServer.OnTimeout += OnTimeout;
-            _server.NetworkServer.OnKeyPressPacket += OnKeyPressPacket;
-            _server.NetworkServer.OnMouseStatePacket += OnMouseStatePacket;
+            Server.NetworkServer.OnDisconnect += OnDisconnect;
+            Server.NetworkServer.OnTimeout += OnTimeout;
+            Server.NetworkServer.OnKeyPressPacket += OnKeyPressPacket;
+            Server.NetworkServer.OnMouseStatePacket += OnMouseStatePacket;
 
-            _entityManager = new EntityManager();
+            _entityManager = new NetworkEntityManager(this);
             _entityManager.LoadMap(null);
             LobbyId = lobbyId;
         }
@@ -68,10 +70,10 @@ namespace BattleTanksServer.Lobby
 
         public void EndLobby()
         {
-            _server.NetworkServer.OnDisconnect -= OnDisconnect;
-            _server.NetworkServer.OnTimeout -= OnTimeout;
-            _server.NetworkServer.OnKeyPressPacket -= OnKeyPressPacket;
-            _server.NetworkServer.OnMouseStatePacket -= OnMouseStatePacket;
+            Server.NetworkServer.OnDisconnect -= OnDisconnect;
+            Server.NetworkServer.OnTimeout -= OnTimeout;
+            Server.NetworkServer.OnKeyPressPacket -= OnKeyPressPacket;
+            Server.NetworkServer.OnMouseStatePacket -= OnMouseStatePacket;
             IsFinished = true;
         }
 
@@ -79,8 +81,6 @@ namespace BattleTanksServer.Lobby
         {
             _players.Remove(playerId);
             _entityManager.RemoveEntity(playerId);
-            var entityRemovedPacket = EntityRemovedPacket.CreatePacket(playerId);
-            _server.NetworkServer.ScopedBroadcast(_players.Values, entityRemovedPacket);
             if (PlayerCount == 0)
                 EndLobby();
         }
@@ -90,13 +90,13 @@ namespace BattleTanksServer.Lobby
             foreach (var player in _entityManager.GetEntitiesOfType<Player>())
             {
                 var newPlayer = NewPlayerPacket.CreatePacket(player.Id, (int)player.Position.X, (int)player.Position.Y, player.Color);
-                _server.NetworkServer.ScopedBroadcast(_players.Values, newPlayer);
+                Server.NetworkServer.ScopedBroadcast(_players.Values, newPlayer);
             }
             foreach (var (playerId, playerConnection) in _players)
             {
                 // Send a LobbyStart
                 var lobbyStart = LobbyStateChangePacket.CreatePacket(LobbyStateCode.LobbyStart, playerId, -1);
-                _server.NetworkServer.SendResponsePacket(playerConnection, lobbyStart);
+                Server.NetworkServer.SendResponsePacket(playerConnection, lobbyStart);
             }
         }
 
@@ -108,7 +108,7 @@ namespace BattleTanksServer.Lobby
             foreach (var player in _entityManager.GetEntitiesOfType<Player>(p => p.Updated).ToList())
             {
                 var updatePacket = PlayerUpdatePacket.CreatePacket(player.Id, player.Position.X, player.Position.Y, player.BarrelPosition.X, player.BarrelPosition.Y, player.Rotation, player.BarrelRotation, player.Velocity.X, player.Velocity.Y);
-                _server.NetworkServer.ScopedBroadcast(_players.Values, updatePacket);
+                Server.NetworkServer.ScopedBroadcast(_players.Values, updatePacket);
             }
         }
 
@@ -116,9 +116,9 @@ namespace BattleTanksServer.Lobby
         {
             // First check if we even care about this playerID
             var packet = args.Packet;
-            var player = _entityManager.GetEntitiesOfType<Player>(p => p.Id == packet.PlayerId).First();
-            if (player == null)
+            if (!_players.ContainsKey(packet.PlayerId))
                 return;
+            var player = _entityManager.GetEntitiesOfType<Player>(p => p.Id == packet.PlayerId).First();
             var keyFlag = (Key)packet.KeyFlags;
             if (keyFlag.IsForward())
                 player.Accelerate(-5f);
